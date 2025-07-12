@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Extensive Cybersecurity RSS Reader</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for better aesthetics */
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start; /* Align to top for longer content */
+            min-height: 100vh;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .container {
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+            max-width: 900px;
+            width: 100%;
+            margin-top: 20px;
+        }
+        .article-card {
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 20px;
+            margin-bottom: 20px;
+        }
+        .article-card:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-3xl font-bold text-gray-800 mb-6 text-center">Extensive Cybersecurity News Feeds</h1>
+
+        <div class="mb-6">
+            <label for="feed-select" class="block text-gray-700 text-sm font-bold mb-2">Select a News Source:</label>
+            <select id="feed-select" class="block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm">
+                <!-- Extensive list of cybersecurity RSS feeds -->
+                <option value="https://www.bleepingcomputer.com/feed/">BleepingComputer</option>
+                <option value="https://feeds.feedburner.com/TheHackersNews">The Hacker News (Feedburner)</option>
+                <option value="https://www.darkreading.com/rss.xml">Dark Reading</option>
+                <option value="https://news.sophos.com/en-us/feed/">Sophos News</option>
+                <option value="https://hackread.com/feed/">HackRead</option>
+                <option value="https://cyble.com/feed/">Cyble</option>
+                <option value="https://www.itsecurityguru.org/feed/">IT Security Guru</option>
+                <option value="https://searchsecurity.techtarget.com/rss/Security-Wire-Daily-News.xml">SearchSecurity (TechTarget)</option>
+                <option value="https://www.csoonline.com/feed/">CSO Online</option>
+                <option value="https://gbhackers.com/feed/">GBHackers</option>
+                <option value="https://krebsonsecurity.com/feed/">Krebs on Security</option>
+                <option value="https://www.bankinfosecurity.com/rss-feeds">BankInfoSecurity</option>
+                <option value="https://www.cyberdefensemagazine.com/feed/">Cyber Defense Magazine</option>
+                <option value="https://cybersguards.com/feed/">Cybersguards</option>
+                <option value="https://www.cybersecurity-insiders.com/feed/">Cybersecurity Insiders</option>
+                <option value="https://grahamcluley.com/feed/">Graham Cluley</option>
+                <option value="https://www.govinfosecurity.com/rssFeeds.php?type=main">GovInfoSecurity</option>
+                <option value="https://feeds.feedblitz.com/thesecurityledger">The Security Ledger (Feedblitz)</option>
+                <option value="https://thecyberpost.com/feed/">The Cyber Post</option>
+                <option value="https://cybersafe.news/feed/">CyberSafe News</option>
+                <option value="https://threatpost.com/feed/">Threatpost</option>
+                <option value="https://news.cyberpress.io/feed/">Cyberpress News</option>
+                <option value="https://www.hackercombat.com/feed/">Hacker Combat</option>
+                <option value="https://k12cybersecure.com/feed/">K12 CyberSecure</option>
+                <option value="https://virtualattacks.com/feed/">Virtual Attacks</option>
+            </select>
+        </div>
+
+        <div id="loading-indicator" class="loading-spinner"></div>
+        <div id="rss-feed-container" class="space-y-6">
+            <!-- RSS feed items will be loaded here -->
+        </div>
+        <div id="error-message" class="hidden bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-6" role="alert">
+            <strong class="font-bold">Error!</strong>
+            <span class="block sm:inline" id="error-text"></span>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const rssFeedContainer = document.getElementById('rss-feed-container');
+            const loadingIndicator = document.getElementById('loading-indicator');
+            const errorMessage = document.getElementById('error-message');
+            const errorText = document.getElementById('error-text');
+            const feedSelect = document.getElementById('feed-select');
+
+            /**
+             * Fetches the RSS feed from the specified URL and parses it.
+             * @param {string} url - The URL of the RSS feed.
+             */
+            async function fetchRssFeed(url) {
+                loadingIndicator.classList.remove('hidden'); // Show loading spinner
+                errorMessage.classList.add('hidden'); // Hide any previous errors
+                rssFeedContainer.innerHTML = ''; // Clear previous content
+
+                try {
+                    // Using a public CORS proxy for fetching the RSS feed.
+                    // For a production cybersecurity application, consider implementing
+                    // your own server-side proxy for better control and reliability.
+                    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`;
+
+                    const response = await fetch(proxyUrl);
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const text = await response.text();
+                    const parser = new DOMParser();
+                    const xmlDoc = parser.parseFromString(text, 'text/xml');
+
+                    // Check for XML parsing errors
+                    if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+                        throw new Error('Error parsing RSS feed XML.');
+                    }
+
+                    displayRssFeed(xmlDoc);
+
+                } catch (error) {
+                    console.error('Failed to fetch or parse RSS feed:', error);
+                    errorText.textContent = `Could not load RSS feed. Please try again later. Details: ${error.message}`;
+                    errorMessage.classList.remove('hidden'); // Show error message
+                } finally {
+                    loadingIndicator.classList.add('hidden'); // Hide loading spinner
+                }
+            }
+
+            /**
+             * Displays the parsed RSS feed content in the HTML.
+             * @param {Document} xmlDoc - The parsed XML document of the RSS feed.
+             */
+            function displayRssFeed(xmlDoc) {
+                const items = xmlDoc.querySelectorAll('item');
+
+                if (items.length === 0) {
+                    rssFeedContainer.innerHTML = '<p class="text-gray-600 text-center">No articles found in the feed.</p>';
+                    return;
+                }
+
+                items.forEach(item => {
+                    const titleElement = item.querySelector('title');
+                    const linkElement = item.querySelector('link');
+                    const descriptionElement = item.querySelector('description');
+                    const pubDateElement = item.querySelector('pubDate');
+
+                    const title = titleElement ? titleElement.textContent : 'No Title';
+                    const link = linkElement ? linkElement.textContent : '#';
+                    // Sanitize description: remove HTML tags and trim whitespace
+                    const description = descriptionElement ? descriptionElement.textContent.replace(/<[^>]*>?/gm, '').trim() : 'No description available.';
+                    const pubDate = pubDateElement ? new Date(pubDateElement.textContent).toLocaleString() : 'No date available';
+
+                    const articleCard = document.createElement('div');
+                    articleCard.className = 'article-card';
+                    articleCard.innerHTML = `
+                        <h2 class="text-xl font-semibold text-gray-900 mb-2">
+                            <a href="${link}" target="_blank" rel="noopener noreferrer" class="article-link text-blue-600 hover:text-blue-800 transition duration-300 ease-in-out">
+                                ${title}
+                            </a>
+                        </h2>
+                        <p class="text-sm text-gray-500 mb-2">${pubDate}</p>
+                        <p class="text-gray-700 leading-relaxed">${description}</p>
+                    `;
+                    rssFeedContainer.appendChild(articleCard);
+                });
+            }
+
+            // Event listener for when the dropdown selection changes
+            feedSelect.addEventListener('change', (event) => {
+                const selectedFeedUrl = event.target.value;
+                fetchRssFeed(selectedFeedUrl);
+            });
+
+            // Initial fetch of the default RSS feed when the page loads
+            fetchRssFeed(feedSelect.value);
+        });
+    </script>
+</body>
+</html>
